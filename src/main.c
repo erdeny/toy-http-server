@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <asm-generic/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -20,8 +21,13 @@ int main(void) {
 	addr.sin_port = htons(PORT);
 	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-	// TODO: TCP'nin TIME_WAIT durumunda ayni porta hemen yeniden bind edebilmek icin
-	// bind'den once SO_REUSEADDR ayarla
+	int opt = 1;
+
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt , sizeof(opt)) < 0) {
+		perror("setsockopt failed");
+		close(server_fd);
+		return EXIT_FAILURE;
+	}
 
 	if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		perror("Bind failed");
