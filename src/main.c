@@ -15,11 +15,11 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
-	struct sockaddr_in addr;
+	struct sockaddr_in server_addr;
 
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(PORT);
-	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 	int opt = 1;
 
@@ -29,7 +29,7 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
-	if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+	if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
 		perror("Bind failed");
 		close(server_fd);
 		return EXIT_FAILURE;
@@ -42,15 +42,24 @@ int main(void) {
 	}
 
 	printf("Listening...\n");
-	
-	if ((client_fd = accept(server_fd, NULL, NULL)) < 0) {
-		perror("Accept failed");
-	} else {
-		printf("Connection successful.\n");
+
+	while (1) {
+		struct sockaddr_in client_addr;
+		socklen_t client_len = sizeof(client_addr);
+		
+		client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_len);
+
+		if (client_fd < 0) {
+			perror("Accept failed");
+			continue;
+		}
+
+		printf("Connected: %s\n", inet_ntoa(client_addr.sin_addr));
+
+		close(client_fd);
 	}
 
-	close(client_fd);
-	close(server_fd);
+	close(server_fd); // TODO: signal
 
 	return 0;
 }
