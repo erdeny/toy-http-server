@@ -52,13 +52,13 @@ static int create_listening_socket(void) {
 	struct sockaddr_in server_addr = create_server_addr();
 
 	int opt = 1;
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt , sizeof(opt)) < 0) {
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt , sizeof opt) < 0) {
 		perror("setsockopt failed");
 		close(server_fd);
 		return -1;
 	}
 
-	if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+	if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof server_addr) < 0) {
 		perror("Bind failed");
 		close(server_fd);
 		return -1;
@@ -78,7 +78,7 @@ static int create_listening_socket(void) {
 static void server_loop(int server_fd) {
 	while (1) {
 		struct sockaddr_in client_addr = {0};
-		socklen_t client_len = sizeof(client_addr);
+		socklen_t client_len = sizeof client_addr;
 		
 		int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_len);
 
@@ -95,7 +95,7 @@ static void handle_client(int client_fd, const struct sockaddr_in *client_addr) 
 	printf("Client connected: %s:%d\n", inet_ntoa(client_addr->sin_addr), ntohs(client_addr->sin_port));
 
 	char buffer[REQUEST_BUFFER] = {0};
-	ssize_t received_bytes = recv(client_fd, buffer, sizeof(buffer),0);
+	ssize_t received_bytes = recv(client_fd, buffer, sizeof buffer,0);
 	
 	if (received_bytes < 0) {
 		perror("Recv failed");
