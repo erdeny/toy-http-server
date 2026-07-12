@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #define SERVER_PORT 8080
 #define BACKLOG 10
+#define REQUEST_BUFFER 4096
 
 static int create_listening_socket(void);
 static struct sockaddr_in create_server_addr(void);
@@ -90,5 +92,19 @@ static void server_loop(int server_fd) {
 
 static void handle_client(int client_fd, const struct sockaddr_in *client_addr) {
 	printf("Client connected: %s:%d\n", inet_ntoa(client_addr->sin_addr), ntohs(client_addr->sin_port));
+
+	char buffer[REQUEST_BUFFER] = {0};
+	ssize_t received_bytes = recv(client_fd, buffer, sizeof(buffer),0);
+	
+	if (received_bytes < 0) {
+		perror("Recv failed");
+	}
+	else if (received_bytes == 0) {
+		printf("Client disconnected.\n");
+	}
+	else {
+		printf("%.*s\n", (int)received_bytes, buffer);
+	}
+
 	close(client_fd);
 }
