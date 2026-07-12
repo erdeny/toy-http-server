@@ -3,6 +3,7 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -104,6 +105,16 @@ static void handle_client(int client_fd, const struct sockaddr_in *client_addr) 
 	}
 	else {
 		printf("%.*s\n", (int)received_bytes, buffer);
+
+		const char *response =
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Length: 9\r\n"
+			"Content-Type: text/plain\r\n"
+			"Connection: close\r\n"
+			"\r\n"
+			"greetings";
+
+		send(client_fd, response, strlen(response), 0);
 	}
 
 	close(client_fd);
